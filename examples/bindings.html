@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pomade - Bindings</title>
+        <meta charset="UTF-8">
+        <script type="application/javascript" src="http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v1.3.0.js"></script>
+        <script type="application/javascript" src="../pomade.min.js"></script>
+    </head>
+    <body>
+
+        <h2>One-way binding</h2>
+        
+        <script type="application/x-handlebars" data-bind="mouse" id="mouse-template">
+            <p>{{pageX}}, {{pageY}}</p>
+        </script>
+        
+        <script type="application/javascript">
+            
+            // default values for the model
+            var mouse = {
+                pageX: 0,
+                pageY: 0
+            };
+            
+            // listen for mouse moves
+            window.addEventListener("mousemove", function (event) {
+                mouse.pageX = event.pageX;
+                mouse.pageY = event.pageY;
+            });
+            
+            // toggle bindings for template
+            function enableBinding(on) {
+                if (on) {
+                    document.getElementById("mouse-template").bind();
+                } else {
+                    document.getElementById("mouse-template").unbind();
+                }
+            }
+            
+            // wait for Pomade to kick off then initialse the state of the checkbox
+            document.addEventListener("DOMContentLoaded", function () {
+                var isBound = document.getElementById("mouse-template").isBound();
+                document.getElementById("bound-checkbox").checked = isBound;
+            });
+            
+        </script>
+
+        <label><input type="checkbox" id="bound-checkbox" onclick="enableBinding(this.checked);" checked /> Bound</label>
+        
+    </body>
+</html>

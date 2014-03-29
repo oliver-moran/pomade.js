@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pomade - To-Do Example</title>
+        <meta charset="UTF-8">
+        <script type="application/javascript" src="http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v1.3.0.js"></script>
+        <script type="application/javascript" src="../pomade.min.js"></script>
+    </head>
+    <body>
+
+        <h2>To-Do Example</h2>
+        
+        <script type="application/javascript">
+            var todo = {
+                items: [
+                    { name: "Collect underpants.", done: false },
+                    { name: "???", done: false },
+                    { name: "PROFIT!!", done: false }
+                ]
+            };
+            
+            function addToDo(){
+                todo.items.push({
+                    name: document.getElementById('new-todo').value,
+                    done: false
+                });
+                console.log(todo.items);
+            }
+        </script>
+        
+        <script type="application/x-handlebars" data-bind="todo">
+            <ol>
+                {{#each items}}
+                <li>
+                    <label {{#if done}}style="text-decoration: line-through;"{{/if}}>
+                        <input 
+                            type="checkbox"
+                            {{#if done}}checked="checked"{{/if}}
+                            onchange="todo.items[{{@index}}].done = this.checked;"
+                        />
+                        {{name}}
+                    </label>
+                </li>
+                {{/each}}
+            </ol>
+        </script>
+        
+        <form action="javascript:addToDo();">
+            <input id="new-todo" type="text" placeholder="Enter new to-do" />
+            <button type="submit">Add</button>
+        </form>
+    </body>
+</html>

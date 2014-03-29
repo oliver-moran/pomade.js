@@ -1,0 +1,28 @@
+{
+  "name": "pomade",
+  "main": "pomade.min.js",
+  "version": "0.1.0",
+  "authors": [
+    "Oliver Moran <oliver.moran@gmail.com>"
+  ],
+  "description": "Dead simple bindings for Handlebars",
+  "keywords": [
+    "handlebars",
+    "templating",
+    "bindings",
+    "mvvm",
+    "mvp"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/oliver-moran/pomade.js",
+  "dependencies": {
+    "handlebars": "https://github.com/components/handlebars.js"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

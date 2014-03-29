@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pomade - Explicit Updating</title>
+        <meta charset="UTF-8">
+        <script type="application/javascript" src="http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v1.3.0.js"></script>
+        <script type="application/javascript" src="../pomade.min.js"></script>
+    </head>
+    <body>
+
+        <h2>Explicit Updating</h2>
+        
+        <script type="application/x-handlebars" data-model="user" id="users-template">
+            <div>
+                <img src="{{picture}}" style="float: left; width: 35px; height: auto; padding-right: 5px;"  />
+                <span style="text-transform: capitalize;">{{name.title}}</span>
+                <span style="text-transform: capitalize;">{{name.first}}</span>
+                <span style="text-transform: capitalize;">{{name.last}}</span><br/>
+                <a href="mailto:{{email}}">{{email}}</a>
+            </div>
+        </script>
+        
+        <script type="application/javascript">
+
+            function getRandomUser() {
+                var request = new XMLHttpRequest();
+                request.open("get", "http://api.randomuser.me/");
+                request.addEventListener("load", parseResponse, false);
+                request.send();
+            }
+            
+            function parseResponse(arg) {
+                var response = JSON.parse(this.responseText);
+                user = response.results[0].user;
+                document.getElementById("users-template").update();
+            }
+            
+            getRandomUser();
+        </script>
+        
+        <p><button onclick="getRandomUser();">Get Another Random User</button></p>
+
+    </body>
+</html>
