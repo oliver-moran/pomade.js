@@ -92,6 +92,7 @@
     /**
      * Compiles a template (the innerHTML of the script tag) against a model 
      * (identified by the data-bind or data-model attibutes).
+     * @returns the HTMLObjectElement that replaces the HTMLScriptElement in the DOM
      */
     HTMLScriptElement.prototype.compile = function(){
         var template = Handlebars.compile(this.innerHTML);
@@ -111,8 +112,8 @@
             }
         }
 
-        // replace the tag
-        this.parentNode.replaceChild(obj, this);
+        // replace the tag (if we can)
+        if (this.parentNode) this.parentNode.replaceChild(obj, this);
 
         // initialise the binding/template
         var model = this.getAttribute("data-bind") || this.getAttribute("data-model");
@@ -125,6 +126,8 @@
         };
         _update.call(binding.element, binding);
         _bindings.push(binding);
+        
+        return obj;
     }
     
     /**
