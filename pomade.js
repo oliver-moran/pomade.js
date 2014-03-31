@@ -54,6 +54,10 @@
     // Finds the global JS object for a given identifier string (e.g. "my.js.obj" will return window.my.js.obj)
     // If the object doesn't exit it will be created
     function _getGlobalObjectFromIdentifier(str) {
+        if (typeof str != "string") {
+            throw new Error("The data-bind or data-model attribute is missing.");
+        }
+        
         var model = window;
         var children = str.split(".");
         
@@ -73,7 +77,7 @@
      */
     function _bindAll() {
         // anything that has a "data-model" attribute is assumed to be a template
-        var scripts = document.querySelectorAll("script[data-bind], script[data-model]");
+        var scripts = document.querySelectorAll("script");
 
         for (var i = 0; i < scripts.length; i++) {
             // the element element
@@ -81,25 +85,20 @@
             var type = script.getAttribute("type");
 
             // if not of the right type then continue
-            if (_mimetypes.indexOf(type) > -1) script.bind();
+            if (_mimetypes.indexOf(type) > -1) script.compile();
         }
     }
     
     /**
-     * Bind a script tag to model (identified by the data-model attibute) and a 
-     * template (the innerHTML of the script tag).
+     * Compiles a template (the innerHTML of the script tag) against a model 
+     * (identified by the data-bind or data-model attibutes).
      */
-    HTMLScriptElement.prototype.bind = function(){
-        var model = this.getAttribute("data-bind");
-        var shouldBind = true;
+    HTMLScriptElement.prototype.compile = function(){
+        var model = this.getAttribute("data-bind") || this.getAttribute("data-model");
+        var shouldBind = this.getAttribute("data-bind") != null;
         
         if (model == null) {
-            model = this.getAttribute("data-model");
-            shouldBind = false;
-        }
-        
-        if (model == null) {
-            throw new Error("The HTMLScriptElement.bind method requires a model to be given either using the data-bind attribute or the data-model attribute.");
+            throw new Error("The HTMLScriptElement.compile method requires a model. Supply a using either the data-bind or data-model attribute.");
         }
         
         var template = Handlebars.compile(this.innerHTML);
@@ -125,16 +124,19 @@
         // initialise the binding/template
         var reference = _getGlobalObjectFromIdentifier(model);
         var binding = {
-            model: model,
             reference: reference,
             clone: _clone(reference),
             template: template,
-            element: obj,
-            isBound: shouldBind
+            element: obj
         };
         _update.call(binding.element, binding);
         _bindings.push(binding);
     }
+    
+    /**
+     * A courtesy method that compiles a script if update is acc
+     */
+    HTMLScriptElement.prototype.update = HTMLScriptElement.prototype.compile;
 
     // this is the function that does the actual updating of a template, it should always be called 
     // using .call() so that 'this' is the HTMLObjectElement
@@ -149,27 +151,19 @@
      * Unbinds an element. An unbound element will have to be update explicitly.
      */
     HTMLObjectElement.prototype.unbind = function () {
-        var _that = this;
-        _bindings.forEach(function (binding, i, bindings) {
-            if (binding.element === _that) {
-                binding.isBound = false;
-            }
-        });
+        var model = this.getAttribute("data-bind") || this.getAttribute("data-model");
+        this.removeAttribute("data-bind");
+        this.setAttribute("data-model", model);
     };
 
     /**
      * Rebinds an HTMLObjectElement.
      */
     HTMLObjectElement.prototype.bind = function () {
-        this.unbind(); // make sure we don't bind twice
-        
-        var _that = this;
-        _bindings.forEach(function (binding, i, bindings) {
-            if (binding.element === _that) {
-                _update.call(binding.element, binding); // initialise the element with the model
-                binding.isBound = true;
-            }
-        });
+        var model = this.getAttribute("data-bind") || this.getAttribute("data-model");
+        this.setAttribute("data-bind", model);
+        this.removeAttribute("data-model");
+        this.update(); // update so that it refreshed immediately
     };
 
     /**
@@ -178,49 +172,56 @@
      *          or undefined is the element is not under template control
      */
     HTMLObjectElement.prototype.isBound = function () {
-        for (var i = 0; i < _bindings.length; i++) {
-            if (_bindings[i].element == this) {
-                return _bindings[i].isBound;
-            }
-        }
+        return this.getAttribute("data-bind") != null;
     };
+    
     /*
      * Explicitly update an element from its template.
      */
     HTMLObjectElement.prototype.update = function () {
-        var _that = this;
-        _bindings.forEach(function (binding, i, bindings) {
-            if (_that == binding.element) {
-                binding.reference = _getGlobalObjectFromIdentifier(binding.model);
-                _update.call(binding.element, binding)
-            }
-        });
+        var model = this.getAttribute("data-bind") || this.getAttribute("data-model");
+        var binding = getBindingForElement(this);
+        binding.reference = _getGlobalObjectFromIdentifier(model);
+        _update.call(this, binding)
     };
+    
+    // finds a binding for a particular element in the _bindings array
+    function getBindingForElement(el) {
+        for (var i = 0; i < _bindings.length; i++) {
+            if (_bindings[i].element == el) return _bindings[i];
+        }
+        throw new Error("Cannot find binding for HTMLObjectElement.");
+    }
     
     // BINDINGS ENGINE
     
     // how often should we look for changes (12fps default)
     var _rate = 1e3/12;
     
-    // compare the original and clone of bindings for changes
-    function _compareBindings() {
-        //console.time("_compareBindings");
-        _bindings.forEach(function (binding, i, bindings) {
-            if (!binding.isBound) return; // not bound so skip
-            
-            // get the actual variable for this identifier, and...
-            var reference = _getGlobalObjectFromIdentifier(binding.model);
-            // ...compare it to the clone
-            if (!_isIdenticalTo(reference, binding.clone)) {
-                binding.clone = _clone(reference);
-                binding.reference = reference;
-                _update.call(binding.element, binding);
-            }
-        });
-        //console.timeEnd("_compareBindings");
-        setTimeout(_compareBindings, _rate);
+    // kick off the main loop
+    setInterval(function () {
+        _bindings.forEach(_compareBindings);
+    }, _rate);
+    
+    // compares individual bindings (as part of a forEach loop)
+    function _compareBindings(binding, i, bindings) {
+        if (!binding.element) {
+            // use this opportunity to clean up bindings
+            bindings.splice(i, 1);
+            return;
+        }
+        if (!binding.element.isBound()) return; // not bound so skip
+
+        // get the actual variable for this identifier, and...
+        var model = binding.element.getAttribute("data-bind") || binding.element.getAttribute("data-model");
+        var reference = _getGlobalObjectFromIdentifier(model);
+        // ...compare it to the clone
+        if (!_isIdenticalTo(reference, binding.clone)) {
+            binding.clone = _clone(reference);
+            binding.reference = reference;
+            _update.call(binding.element, binding);
+        }
     }
-    setTimeout(_compareBindings, _rate); // setTimeout rather than setInterval so they never overlap
     
     // deep clone an object (only it's own properties!)
     function _clone(obj) {
@@ -243,7 +244,7 @@
     function _isIdenticalTo(obj1, obj2) {
         // combine the props of both obj1 and obj2
         var props = Object.getOwnPropertyNames(obj1);
-        props.concat(Object.getOwnPropertyNames(obj2));
+        props = props.concat(Object.getOwnPropertyNames(obj2));
         props = props.filter(function(elem, pos) {
             // filter out duplicates
             return props.indexOf(elem) == pos;

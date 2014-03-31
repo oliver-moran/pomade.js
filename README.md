@@ -2,46 +2,58 @@
 
 Dead simple bindings for [Handlebars](http://handlebarsjs.com/).
 
-## Binding to a template ##
+## Quick start ##
 
-Simply describe your template inline with your HTML using a script tag, as follows:
+Simply describe your template inline with your HTML using a script tag, as 
+follows:
 
-    <script type="application/x-handlebars" ... >
+    <script type="application/x-handlebars" data-bind="model">
        <!-- Handlebars template goes here. -->
     </script>
 
-Ordinarly, templates will be bound when on the `DOMContentLoaded` event. If a template is added after this event, then the script will need to be compiled explicitly, as follows:
+Now, the template will be bound to the JavaScript Object `model` (or any other 
+JS Object indicated by `data-bind` attribute). When that Object changes, that
+variable changes, the template will be automatically refreshed.
 
-    document.getElementById('myTemplate').bind();
+Ordinarly, all templates in a `Document` will be bound on the `DOMContentLoaded`
+event. If a template is added after this event (e.g. dynamically by JS) then 
+the script will need to be compiled explicitly, as follows:
 
-The JavaScript variable to bind to is identified using the `data-bind` attribute, as follows:
+    document.getElementById("myTemplate").compile();
 
-    <script type="application/x-handlebars" data-bind="myJsObject">
+## Bound or unbound? ##
+
+Pomade.js allows two methods of associating a template with a model. The model
+can be bound or unbound. Bound templates are refreshed automatically (with a 
+max 80⅓ms delay) when the model changes. Unbound templates need to be updated
+explicitly.
+
+Unbound templates are described using the `data-model` attribute (instead of
+the `data-bind` attribute):
+
+    <script type="application/x-handlebars" data-model="model">
        <!-- Handlebars template goes here. -->
     </script>
 
-When this variable is changes the template will be automatically refreshed.
+Alternatively, templates can be bound and unbound from their models as follows:
 
-Alternatively, if the `data-model` attribute is used, the template will not be automatically updated when the JavaScript variables changes:
+    document.getElementById("myTemplate").unbind();
+    document.getElementById("myTemplate").bind();
 
-    <script type="application/x-handlebars" data-model="jsObject" id="myTemplate">
-       <!-- Handlebars template goes here. -->
-    </script>
+When a template is unbounded is needs to be updated explictly using:
 
-In this case, to update the template explicitly, call `document.getElementById('myTemplate').update()`.
-
-## Unbinding a template ##
-
-Templates can be unbounded as follows:
-
-    document.getElementById('myTemplate').unbind();
-
-When a template is unbounded is needs to be updated explictly using `document.getElementById('myTemplate').update()`.
-
-To rebind a template use:
-
-    document.getElementById('myTemplate').bind();
+    document.getElementById("myTemplate").update();
 
 To test if a template is bound, use:
 
-    document.getElementById('myTemplate').isBound();
+    document.getElementById("myTemplate").isBound(); // true or false
+
+## Useful info ##
+
+- Pomade.JS checks if a model is updated 12 times per second (every 83⅓ms).
+- `<script>` tags are replaced with `<object>` tags when compiled. Global HTML5
+  attributes are copied over (non-standard-compliant tags will be skipped).
+
+## License ##
+
+Pomade.JS is licensed under the [MIT License](http://opensource.org/licenses/MIT).
