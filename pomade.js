@@ -94,13 +94,6 @@
      * (identified by the data-bind or data-model attibutes).
      */
     HTMLScriptElement.prototype.compile = function(){
-        var model = this.getAttribute("data-bind") || this.getAttribute("data-model");
-        var shouldBind = this.getAttribute("data-bind") != null;
-        
-        if (model == null) {
-            throw new Error("The HTMLScriptElement.compile method requires a model. Supply a using either the data-bind or data-model attribute.");
-        }
-        
         var template = Handlebars.compile(this.innerHTML);
 
         // replace the SCRIPT tag with a OBJECT tag
@@ -122,6 +115,7 @@
         this.parentNode.replaceChild(obj, this);
 
         // initialise the binding/template
+        var model = this.getAttribute("data-bind") || this.getAttribute("data-model");
         var reference = _getGlobalObjectFromIdentifier(model);
         var binding = {
             reference: reference,
