@@ -15,12 +15,6 @@ Now, the template will be bound to the JavaScript Object `model` (or any other
 JS Object indicated by `data-bind` attribute). When that Object changes, the 
 template will be automatically refreshed.
 
-Ordinarly, all templates in a `Document` will be bound on the `DOMContentLoaded`
-event. If a template is added after this event (e.g. dynamically by JS) then 
-the template will need to be compiled explicitly, as follows:
-
-    document.getElementById("myTemplate").compile();
-
 ## Bound or unbound? ##
 
 Pomade.js allows two methods of associating a template with a model. The model
@@ -47,6 +41,27 @@ When a template is unbounded, it needs to be updated explictly using:
 To test if a template is bound, use:
 
     document.getElementById("myTemplate").isBound(); // true or false
+
+## Dynamically adding templates ##
+
+Ordinarly, all templates in a `Document` will be compiled on the 
+`DOMContentLoaded` event. If a template is added after this event (e.g. 
+dynamically by JS) then the template will need to be compiled explicitly, as 
+follows:
+
+    document.getElementById("myTemplate").compile(); // returns a HTMLObjectElement
+
+Compiling a script tag in this way implicitly repalces the HTMLScriptElement
+with a HTMLObjectElement in the DOM.
+
+If the HTMLScriptElement is created in JavaScript, it can be compiled and
+added to the document explicitly, as follows:
+
+    var obj = script.compile();
+    document.body.appendChild(obj);
+
+The object returned by `HTMLScriptElement.compile()` is the a HTMLObjectElement
+that can be added to the DOM. See `examples/dynamic.html` for a working example.
 
 ## Useful info ##
 

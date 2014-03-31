@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pomade - Adding Templates Dynamically</title>
+        <meta charset="UTF-8">
+        <script type="application/javascript" src="http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v1.3.0.js"></script>
+        <script type="application/javascript" src="../pomade.min.js"></script>
+    </head>
+    <body>
+
+        <h2>Adding Templates Dynamically</h2>
+        
+        <script type="application/javascript">
+
+            var script = document.createElement("script");
+            script.setAttribute("type", "application/x-handlebars");
+            script.setAttribute("data-bind", "clock");
+            script.innerHTML = "<p>{{hour}}:{{minute}}:{{second}}</p>";
+            
+            function addClock() {
+                var obj = script.compile();
+                document.body.appendChild(obj);
+            }
+            
+            var clock = {};
+            function getClock(){
+                var date = new Date();
+                clock.hour = date.getHours();
+                clock.minute = date.getMinutes();
+                clock.second = date.getSeconds();
+                
+                // nice presentation
+                if (clock.minute < 10) clock.minute = "0" + clock.minute;
+                if (clock.second < 10) clock.second = "0" + clock.second;
+            }
+            getClock(); // init
+            setInterval(getClock, 1e3); // update
+            
+        </script>
+        
+        <p><button onclick="addClock();">Add Clock</button></p>
+
+    </body>
+</html>
