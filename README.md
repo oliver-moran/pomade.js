@@ -12,12 +12,12 @@ follows:
     </script>
 
 Now, the template will be bound to the JavaScript Object `model` (or any other 
-JS Object indicated by `data-bind` attribute). When that Object changes, that
-variable changes, the template will be automatically refreshed.
+JS Object indicated by `data-bind` attribute). When that Object changes, the 
+template will be automatically refreshed.
 
 Ordinarly, all templates in a `Document` will be bound on the `DOMContentLoaded`
 event. If a template is added after this event (e.g. dynamically by JS) then 
-the script will need to be compiled explicitly, as follows:
+the template will need to be compiled explicitly, as follows:
 
     document.getElementById("myTemplate").compile();
 
@@ -40,7 +40,7 @@ Alternatively, templates can be bound and unbound from their models as follows:
     document.getElementById("myTemplate").unbind();
     document.getElementById("myTemplate").bind();
 
-When a template is unbounded is needs to be updated explictly using:
+When a template is unbounded, it needs to be updated explictly using:
 
     document.getElementById("myTemplate").update();
 
