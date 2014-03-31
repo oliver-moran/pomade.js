@@ -28,7 +28,7 @@
     /* Bind all templates as soon as the DOM is ready. */
     document.addEventListener("DOMContentLoaded", function () {
         if (typeof Handlebars === "undefined") {
-            console.warn("Handlebars.js must be included to use Pomade. http://handlebarsjs.com/");
+            console.warn("Handlebars <http://handlebarsjs.com/> must be included to use Pomade.");
         }
 
         _bindAll(); // kick off template bindings
@@ -51,11 +51,15 @@
     // a URL to use as for the data attribute of the handlebars object
     var _url = "handlebars:" + window.location.host + window.location.pathname + window.location.search;
 
+    // the HTMLObjectElement requires that there is always *some content* inside it, otherwise it can show up as 'plugin-missing'
+    // this tagline is added to every template to ensure the content is never empty
+    var _comment = "<!-- Templated with ❤ by Handlebars <http://handlebarsjs.com/> and Pomade <https://github.com/oliver-moran/pomade.js> -->";
+    
     // Finds the global JS object for a given identifier string (e.g. "my.js.obj" will return window.my.js.obj)
     // If the object doesn't exit it will be created
     function _getGlobalObjectFromIdentifier(str) {
         if (typeof str != "string") {
-            throw new Error("The data-bind or data-model attribute is missing.");
+            throw new Error("No JavaScript model was given. The data-bind or data-model attribute is missing from the HTML element.");
         }
         
         var model = window;
@@ -140,7 +144,8 @@
     function _update(binding) {
         // the update event - fires when the model updates
         var html = binding.template(binding.reference);
-        html = "<!-- pomade.js -->" + html; // always make sure there is *some* content
+        // always make sure there is something inside the object tag, otherwise it shows a plugin-missing
+        html = _comment + html;
         this.innerHTML = html;
     }
 
