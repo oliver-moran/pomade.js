@@ -49,7 +49,7 @@ Ordinarly, all templates in a `Document` will be compiled on the
 dynamically by JS) then the template will need to be compiled explicitly, as 
 follows:
 
-    document.getElementById("myTemplate").compile(); // returns a HTMLObjectElement
+    document.getElementById("myTemplate").compile();
 
 Compiling a script tag in this way implicitly repalces the HTMLScriptElement
 with a HTMLObjectElement in the DOM.
@@ -57,7 +57,7 @@ with a HTMLObjectElement in the DOM.
 If the HTMLScriptElement is created in JavaScript, it can be compiled and
 added to the document explicitly, as follows:
 
-    var obj = script.compile();
+    var obj = script.compile(); // returns a HTMLObjectElement
     document.body.appendChild(obj);
 
 The object returned by `HTMLScriptElement.compile()` is the a HTMLObjectElement
@@ -65,7 +65,7 @@ that can be added to the DOM. See `examples/dynamic.html` for a working example.
 
 ## Useful info ##
 
-- Pomade.JS checks if a model is updated 12 times per second (every 83⅓ms).
+- Pomade.js checks if a model is updated 12 times per second (every 83⅓ms).
 - `<script>` tags are replaced with `<object>` tags when compiled. Global HTML5
   attributes are copied over (non-standard-compliant tags will be skipped).
 
