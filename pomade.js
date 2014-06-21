@@ -216,7 +216,7 @@
 
         // get the actual variable for this identifier, and...
         var model = binding.element.getAttribute("data-bind") || binding.element.getAttribute("data-model");
-        var reference = _getGlobalObjectFromIdentifier(model);
+        var reference = _getGlobalObjectFromIdentifier(model);        
         // ...compare it to the clone
         if (!_isIdenticalTo(reference, binding.clone)) {
             binding.clone = _clone(reference);
@@ -225,15 +225,35 @@
         }
     }
     
-    // deep clone an object (only it's own properties!)
-    function _clone(obj) {
+    // deep clone an object (only its own properties!)
+    function _clone(obj, /* INTERNAL */ _visited) {    
         var clone = {};
-        var props = Object.getOwnPropertyNames(obj);
+    
+        // Initialize the visited objects array if needed
+        // This is used to detect cyclic references
+        if (_visited == undefined){
+            _visited = [];
+        }
+        // Ensure obj has not already been visited
+        else {
+            var i, len = _visited.length;
+            for (i = 0; i < len; i++) {
+                // If obj was already visited, don't try to copy it, just return the reference
+                if (obj === _visited[i]) {
+                    return obj;
+                }
+            }
+        }
 
+        // Add this object to the visited array
+        _visited.push(obj);
+        
+        var props = Object.getOwnPropertyNames(obj);
+ 
         for (var i = 0; i < props.length; i++) {
             if (obj[props[i]] instanceof Object) {
                 // recursive clone
-                clone[props[i]] = _clone(obj[props[i]]);
+                clone[props[i]] = _clone(obj[props[i]], _visited);
             } else {
                 // copy property
                 clone[props[i]] = obj[props[i]];
@@ -244,6 +264,9 @@
     
     // compare to objects, return false if not identical, otherwise true
     function _isIdenticalTo(obj1, obj2) {
+        // Check for cyclic object references
+        if (obj1 === obj2) return true;
+    
         // combine the props of both obj1 and obj2
         var props = Object.getOwnPropertyNames(obj1);
         props = props.concat(Object.getOwnPropertyNames(obj2));
@@ -253,7 +276,7 @@
         });
         
         for (var i = 0; i < props.length; i++) {
-            if (obj1[props[i]] instanceof Object && obj2[props[i]] instanceof Object) {
+            if (obj1[props[i]] instanceof Object && obj2[props[i]] instanceof Object) {                
                 var ret = _isIdenticalTo(obj1[props[i]], obj2[props[i]]);
                 if (!ret) return false;
             } else {
