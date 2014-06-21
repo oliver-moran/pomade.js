@@ -226,26 +226,19 @@
     }
     
     // deep clone an object (only its own properties!)
-    function _clone(obj, /* INTERNAL */ _visited) {    
+    function _clone(obj, /* INTERNAL */ _visited) {
         var clone = {};
     
-        // Initialize the visited objects array if needed
-        // This is used to detect cyclic references
-        if (_visited == undefined){
-            _visited = [];
-        }
-        // Ensure obj has not already been visited
-        else {
-            var i, len = _visited.length;
-            for (i = 0; i < len; i++) {
-                // If obj was already visited, don't try to copy it, just return the reference
-                if (obj === _visited[i]) {
-                    return obj;
-                }
-            }
-        }
-
-        // Add this object to the visited array
+        // initialize the visited objects array, if needed
+        // this is used to detect cyclic references
+        if (_visited == undefined) _visited = [];
+        
+        // if obj was already visited, don't try to copy it,
+        // just return the reference to avoid infinte loops
+        var i = _visited.indexOf(obj);
+        if (i > -1) return _visited[i];
+        
+        // add this object to the visited array
         _visited.push(obj);
         
         var props = Object.getOwnPropertyNames(obj);
@@ -264,7 +257,7 @@
     
     // compare to objects, return false if not identical, otherwise true
     function _isIdenticalTo(obj1, obj2) {
-        // Check for cyclic object references
+        // are these simply the same object?
         if (obj1 === obj2) return true;
     
         // combine the props of both obj1 and obj2
