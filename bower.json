@@ -1,9 +1,10 @@
 {
   "name": "pomade",
   "main": "pomade.min.js",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "authors": [
-    "Oliver Moran <oliver.moran@gmail.com>"
+    "Oliver Moran <oliver.moran@gmail.com>",
+    "Matt Browne <https://github.com/mbrowne>"
   ],
   "description": "Dead simple bindings for Handlebars",
   "keywords": [
